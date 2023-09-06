@@ -1,0 +1,121 @@
+---
+# Source: mlrun-ce/charts/mlrun/templates/db-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlrun-db
+  labels:
+    helm.sh/chart: mlrun-0.9.14
+    app.kubernetes.io/version: "1.4.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: mlrun
+    app.kubernetes.io/instance: release-name
+    release: release-name
+    app.kubernetes.io/component: "db"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mlrun
+      app.kubernetes.io/instance: release-name
+      release: release-name
+      app.kubernetes.io/component: "db"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mlrun
+        app.kubernetes.io/instance: release-name
+        release: release-name
+        app.kubernetes.io/component: "db"
+    spec:
+      securityContext:
+        fsGroup: 999
+        runAsUser: 999
+      terminationGracePeriodSeconds: 120
+      initContainers:
+        - name: init-mysql
+          image: "mysql:8"
+          imagePullPolicy: IfNotPresent
+          resources:
+            {}
+          env:
+            - name: MYSQL_ALLOW_EMPTY_PASSWORD
+              value: "true"
+          command: ["/bin/bash", "/etc/config/mysql/init-v3io-mysql.sh"]
+          securityContext:
+            runAsUser: 999
+          volumeMounts:
+            - name: mysql-fuse
+              mountPath: "/var/lib/mysql"
+            - name: mysql-config
+              mountPath: /etc/config/mysql
+      containers:
+        - name: mlrun-db
+          securityContext:
+            runAsUser: 999
+          image: "mysql:8"
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/bash", "/etc/config/mysql/v3io-mysql.sh"]
+          ports:
+          - name: mysql
+            containerPort: 3306
+            protocol: TCP
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/bash", "/etc/config/mysql/graceful_shutdown.sh"]
+          livenessProbe:
+            
+            exec:
+              command:
+              - /bin/bash
+              - /etc/config/mysql/health_check.sh
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            
+            exec:
+              command:
+              - /bin/bash
+              - /etc/config/mysql/health_check.sh
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 1
+          env:
+          - name: MYSQL_ALLOW_EMPTY_PASSWORD
+            value: "true"
+          resources:
+            {}
+          volumeMounts:
+          - name: mysql-fuse
+            mountPath: "/var/lib/mysql"
+          - name: mysql-config
+            mountPath: /etc/config/mysql
+          - name: mysql-init-scripts
+            mountPath: /etc/config/mysql/init-scripts
+      volumes:
+        - name: mysql-init-scripts
+          configMap:
+            name: mlrun-db-init
+        - name: mysql-config
+          configMap:
+            name: mlrun-db
+        # Add MySQL data mount (Fuse)
+        - name: mysql-fuse
+          persistentVolumeClaim:
+            claimName: mlrun-db-pvc
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: mlrun
+                  app.kubernetes.io/instance: release-name
+                  release: release-name
+                  app.kubernetes.io/component: "api"
+              topologyKey: "kubernetes.io/hostname"

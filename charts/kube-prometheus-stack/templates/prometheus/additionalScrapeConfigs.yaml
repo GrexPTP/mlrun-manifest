@@ -1,0 +1,19 @@
+---
+# Source: mlrun-ce/charts/kube-prometheus-stack/templates/prometheus/additionalScrapeConfigs.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: monitoring-prometheus-scrape-confg
+  namespace: default
+  labels:
+    app: kube-prometheus-stack-prometheus-scrape-confg
+    
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "41.7.2"
+    app.kubernetes.io/part-of: kube-prometheus-stack
+    chart: kube-prometheus-stack-41.7.2
+    release: "release-name"
+    heritage: "Helm"
+data:
+  additional-scrape-configs.yaml: "LSBqb2JfbmFtZTogbW9kZWwtbW9uaXRvcmluZy1qb2IKICBrdWJlcm5ldGVzX3NkX2NvbmZpZ3M6CiAgLSBlbmFibGVfaHR0cDI6IHRydWUKICAgIGZvbGxvd19yZWRpcmVjdHM6IHRydWUKICAgIGt1YmVjb25maWdfZmlsZTogIiIKICAgIG5hbWVzcGFjZXM6CiAgICAgIG5hbWVzOgogICAgICAtIG1scnVuCiAgICAgIG93bl9uYW1lc3BhY2U6IGZhbHNlCiAgICByb2xlOiBwb2QKICAgIHNlbGVjdG9yczoKICAgIC0gbGFiZWw6IHR5cGU9bW9kZWwtbW9uaXRvcmluZy1zdHJlYW0KICAgICAgcm9sZTogcG9kCiAgbWV0cmljc19wYXRoOiAvbW9kZWwtbW9uaXRvcmluZy1tZXRyaWNzCiAgcmVsYWJlbF9jb25maWdzOgogIC0gYWN0aW9uOiByZXBsYWNlCiAgICByZWdleDogKC4qKQogICAgcmVwbGFjZW1lbnQ6ICQxCiAgICBzZXBhcmF0b3I6IDsKICAgIHNvdXJjZV9sYWJlbHM6CiAgICAtIF9fbWV0YV9rdWJlcm5ldGVzX25hbWVzcGFjZQogICAgdGFyZ2V0X2xhYmVsOiBuYW1lc3BhY2UKICBzY2hlbWU6IGh0dHAKICBzY3JhcGVfaW50ZXJ2YWw6IDMwcwogIHNjcmFwZV90aW1lb3V0OiAxMHMKICB0bHNfY29uZmlnOgogICAgaW5zZWN1cmVfc2tpcF92ZXJpZnk6IHRydWU="

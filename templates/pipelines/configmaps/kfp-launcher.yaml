@@ -1,0 +1,11 @@
+---
+# Source: mlrun-ce/templates/pipelines/configmaps/kfp-launcher.yaml
+apiVersion: v1
+data:
+  defaultPipelineRoot: ""
+kind: ConfigMap
+metadata:
+  annotations:
+  labels:
+    application-crd-id: kubeflow-pipelines
+  name: kfp-launcher

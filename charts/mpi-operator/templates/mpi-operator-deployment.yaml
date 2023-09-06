@@ -1,0 +1,48 @@
+---
+# Source: mlrun-ce/charts/mpi-operator/templates/mpi-operator-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mpi-operator
+  namespace: default
+  labels:
+    app: mpi-operator
+    chart: mpi-operator-0.6.0
+    release: release-name
+    heritage: Helm
+    crd-version: v1
+spec:
+  replicas: 
+  selector:
+    matchLabels:
+      app: mpi-operator
+  template:
+    metadata:
+      labels:
+        app: mpi-operator
+        chart: mpi-operator-0.6.0
+        release: release-name
+        heritage: Helm
+        component: mpi-operator
+        crd-version: v1
+    spec:
+      serviceAccountName: mpi-operator
+      containers:
+      - name: mpi-operator
+        image: "gcr.io/iguazio/mpi-operator:v0.2.3-igz"
+        imagePullPolicy: 
+        command: ["/opt/mpi-operator.v1"]
+        args: [
+          "-alsologtostderr",
+          "--kubectl-delivery-image",
+          "mpioperator/kubectl-delivery:v0.2.3",
+          "--namespace",
+          "default",
+          "--lock-namespace",
+          "default"
+        ]
+        env:
+        - name: KUBEFLOW_NAMESPACE
+          value: default
+        resources:
+          {}

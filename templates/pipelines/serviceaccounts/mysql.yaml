@@ -1,0 +1,9 @@
+---
+# Source: mlrun-ce/templates/pipelines/serviceaccounts/mysql.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+  labels:
+    application-crd-id: kubeflow-pipelines
+  name: mysql

@@ -1,0 +1,40 @@
+---
+# Source: mlrun-ce/charts/kube-prometheus-stack/templates/grafana/configmaps-datasources.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-grafana-datasource
+  namespace: default
+  labels:
+    grafana_datasource: "1"
+    app: kube-prometheus-stack-grafana
+    
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "41.7.2"
+    app.kubernetes.io/part-of: kube-prometheus-stack
+    chart: kube-prometheus-stack-41.7.2
+    release: "release-name"
+    heritage: "Helm"
+data:
+  datasource.yaml: |-
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      uid: prometheus
+      url: http://monitoring-prometheus.default:9090/
+      access: proxy
+      isDefault: true
+      jsonData:
+        timeInterval: 30s
+    - database: null
+      editable: true
+      maxIdleConns: 100
+      maxIdleConnsAuto: true
+      maxOpenConns: 100
+      name: iguazio
+      password: null
+      type: mysql
+      url: null
+      user: null

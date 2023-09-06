@@ -1,0 +1,9 @@
+---
+# Source: mlrun-ce/templates/pipelines/serviceaccounts/kubeflow-pipelines-viewer.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+  labels:
+    application-crd-id: kubeflow-pipelines
+  name: kubeflow-pipelines-viewer

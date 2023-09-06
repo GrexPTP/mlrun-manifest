@@ -1,0 +1,36 @@
+---
+# Source: mlrun-ce/charts/kube-prometheus-stack/templates/prometheus-operator/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: monitoring-operator
+  namespace: default
+  labels:
+    app: kube-prometheus-stack-operator
+    
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "41.7.2"
+    app.kubernetes.io/part-of: kube-prometheus-stack
+    chart: kube-prometheus-stack-41.7.2
+    release: "release-name"
+    heritage: "Helm"
+spec:
+  endpoints:
+  - port: https
+    scheme: https
+    tlsConfig:
+      serverName: monitoring-operator
+      ca:
+        secret:
+          name: monitoring-admission
+          key: ca
+          optional: false
+    honorLabels: true
+  selector:
+    matchLabels:
+      app: kube-prometheus-stack-operator
+      release: "release-name"
+  namespaceSelector:
+    matchNames:
+      - "default"

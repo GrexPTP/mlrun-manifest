@@ -1,0 +1,22 @@
+---
+# Source: mlrun-ce/charts/minio/templates/console-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-console
+  namespace: "default"
+  labels:
+    app: minio
+    chart: minio-4.0.2
+    release: release-name
+    heritage: Helm
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 9001
+      protocol: TCP
+      nodePort: 30090
+  selector:
+    app: minio
+    release: release-name

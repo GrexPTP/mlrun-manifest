@@ -1,0 +1,27 @@
+---
+# Source: mlrun-ce/charts/mlrun/templates/db-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlrun-db
+  labels:
+    helm.sh/chart: mlrun-0.9.14
+    app.kubernetes.io/version: "1.4.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: mlrun
+    app.kubernetes.io/instance: release-name
+    release: release-name
+    app.kubernetes.io/component: "db"
+spec:
+  type: ClusterIP
+  ports:
+    - name: mysql
+      port: 3306
+      protocol: TCP
+      targetPort: mysql
+
+  selector:
+    app.kubernetes.io/name: mlrun
+    app.kubernetes.io/instance: release-name
+    release: release-name
+    app.kubernetes.io/component: "db"

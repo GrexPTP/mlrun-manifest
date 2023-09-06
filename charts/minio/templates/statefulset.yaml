@@ -1,0 +1,105 @@
+---
+# Source: mlrun-ce/charts/minio/templates/statefulset.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-svc
+  namespace: "default"
+  labels:
+    app: minio
+    chart: minio-4.0.2
+    release: "release-name"
+    heritage: "Helm"
+spec:
+  publishNotReadyAddresses: true
+  clusterIP: None
+  ports:
+    - name: http
+      port: 9000
+      protocol: TCP
+  selector:
+    app: minio
+    release: release-name
+---
+# Source: mlrun-ce/charts/minio/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio
+  namespace: "default"
+  labels:
+    app: minio
+    chart: minio-4.0.2
+    release: release-name
+    heritage: Helm
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: "Parallel"
+  serviceName: minio-svc
+  replicas: 4
+  selector:
+    matchLabels:
+      app: minio
+      release: release-name
+  template:
+    metadata:
+      name: minio
+      labels:
+        app: minio
+        release: release-name
+      annotations:
+        checksum/secrets: f31ccbe8bc4584e9c214043c2f53ec87b12c122a8c8e187bdc03c2355dce231a
+        checksum/config: 1aa2355dced382d9000042a151e5a3ccc6bea1f4fdad4c26c80ac72b4f5d1806
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+
+      serviceAccountName: minio-sa
+      containers:
+        - name: minio
+          image: quay.io/minio/minio:RELEASE.2022-05-08T23-50-31Z
+          imagePullPolicy: IfNotPresent
+
+          command: [ "/bin/sh",
+            "-ce",
+            "/usr/bin/docker-entrypoint.sh minio server  http://minio-{0...3}.minio-svc.default.svc.cluster.local/export -S /etc/minio/certs/ --address :9000 --console-address :9001" ]
+          volumeMounts:
+            - name: export
+              mountPath: /export            
+          ports:
+            - name: http
+              containerPort: 9000
+            - name: http-console
+              containerPort: 9001
+          env:
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: minio
+                  key: rootUser
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: minio
+                  key: rootPassword
+            - name: MINIO_PROMETHEUS_AUTH_TYPE
+              value: "public"
+          resources:
+            requests:
+              memory: 0.5Gi      
+      volumes:
+        - name: minio-user
+          secret:
+            secretName: minio        
+  volumeClaimTemplates:
+    - metadata:
+        name: export
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi

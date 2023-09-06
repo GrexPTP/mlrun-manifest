@@ -1,0 +1,21 @@
+---
+# Source: mlrun-ce/charts/mlrun/templates/db-configmap-init.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mlrun-db-init
+  labels:
+    helm.sh/chart: mlrun-0.9.14
+    app.kubernetes.io/version: "1.4.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: mlrun
+    app.kubernetes.io/instance: release-name
+    release: release-name
+    app.kubernetes.io/component: "db"
+data:
+  enable-root-remote-access.sql: |
+    -- Allow passwordless (insecure) access to root user from anywhere
+    CREATE USER IF NOT EXISTS 'root'@'%';
+    GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
+    FLUSH PRIVILEGES;
+    CREATE DATABASE IF NOT EXISTS mlrun;

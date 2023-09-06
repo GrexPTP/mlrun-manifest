@@ -1,0 +1,22 @@
+---
+# Source: mlrun-ce/templates/config/mlrun-env-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mlrun-common-env
+data:
+  MLRUN_STORAGE__AUTO_MOUNT_TYPE: s3
+  MLRUN_STORAGE__AUTO_MOUNT_PARAMS: "aws_access_key=minio,aws_secret_key=minio123,endpoint_url=http://minio.mlrun.svc.cluster.local:9000"
+  MLRUN_HTTPDB__PROJECTS__FOLLOWERS: nuclio
+  S3_ENDPOINT_URL: http://minio.mlrun.svc.cluster.local:9000
+  AWS_SECRET_ACCESS_KEY: minio123
+  AWS_ACCESS_KEY_ID: minio
+  MLRUN_HTTPDB__REAL_PATH: s3://
+  MLRUN_ARTIFACT_PATH: s3://mlrun/projects/{{run.project}}/artifacts
+  MLRUN_FEATURE_STORE__DATA_PREFIXES__DEFAULT: s3://mlrun/projects/{project}/FeatureStore/{name}/{kind}
+  MLRUN_FEATURE_STORE__DATA_PREFIXES__NOSQL: ""
+  MLRUN_CE__MODE: full
+  MLRUN_CE__VERSION: 0.6.2
+  MLRUN_DEFAULT_TENSORBOARD_LOGS_PATH: /home/jovyan/data/tensorboard/{{project}} 
+  MLRUN_FEATURE_STORE__DEFAULT_TARGETS: parquet
+  MLRUN_MODEL_ENDPOINT_MONITORING__STORE_TYPE: sql

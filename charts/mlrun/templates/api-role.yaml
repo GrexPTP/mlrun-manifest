@@ -1,0 +1,25 @@
+---
+# Source: mlrun-ce/charts/mlrun/templates/api-role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mlrun-api
+  labels:
+
+    helm.sh/chart: mlrun-0.9.14
+    app.kubernetes.io/version: "1.4.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: mlrun
+    app.kubernetes.io/instance: release-name
+    release: release-name
+    app.kubernetes.io/component: "api"
+rules:
+- apiGroups:      ['']
+  resources:      ['pods', 'pods/exec', 'pods/log', 'services', 'secrets', 'configmaps']
+  verbs:          ['*']
+- apiGroups:      ['kubeflow.org']
+  resources:      ['mpijobs']
+  verbs:          ['*']
+- apiGroups:      ['sparkoperator.k8s.io']
+  resources:      ['sparkapplications', 'scheduledsparkapplications']
+  verbs:          ['*']

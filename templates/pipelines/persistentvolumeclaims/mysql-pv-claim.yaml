@@ -1,0 +1,21 @@
+---
+# Source: mlrun-ce/templates/pipelines/persistentvolumeclaims/mysql-pv-claim.yaml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: "mysql-pv-claim"
+  labels:
+    helm.sh/chart: mlrun-ce-0.6.2
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: mlrun-ce
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: "pipelines"
+    application-crd-id: kubeflow-pipelines
+  annotations: 
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "20Gi"

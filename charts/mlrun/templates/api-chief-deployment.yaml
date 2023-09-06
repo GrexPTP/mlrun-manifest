@@ -1,0 +1,127 @@
+---
+# Source: mlrun-ce/charts/mlrun/templates/api-chief-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlrun-api-chief
+  labels:
+    helm.sh/chart: mlrun-0.9.14
+    app.kubernetes.io/version: "1.4.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: mlrun
+    app.kubernetes.io/instance: release-name
+    release: release-name
+    app.kubernetes.io/component: "api"
+    app.kubernetes.io/sub-component: "chief"
+spec:
+  # .api.chief.minReplicas replaced .api.replicaCount, keeping support for backwards compatibility
+  # kindIs is the way to differentiate between empty and 0 (if replicaCount is 0 we do want to use it)
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mlrun
+      app.kubernetes.io/instance: release-name
+      release: release-name
+      app.kubernetes.io/component: "api"
+      app.kubernetes.io/sub-component: "chief"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mlrun
+        app.kubernetes.io/instance: release-name
+        release: release-name
+        app.kubernetes.io/component: "api"
+        app.kubernetes.io/sub-component: "chief"
+    spec:
+      serviceAccountName: mlrun-api
+      securityContext:
+        {}
+      containers:
+        - name: mlrun-api
+          securityContext:
+            {}
+          image: "mlrun/mlrun-api:1.4.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+          - name: MLRUN_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: MLRUN_HTTPDB__CLUSTERIZATION__ROLE
+            value: "chief"
+          - name: MLRUN_LOG_LEVEL
+            value: INFO
+          - name: MLRUN_HTTPDB__DB_TYPE
+            value: "sqldb"
+          - name: MLRUN_HTTPDB__API_URL
+            value: http://mlrun-api:8080
+          - name: MLRUN_HTTPDB__DIRPATH
+            value: /mlrun/db
+          - name: MLRUN_HTTPDB__BUILDER__DOCKER_REGISTRY
+            value: mustprovide
+          - name: MLRUN_HTTPDB__DSN
+            value: mysql+pymysql://root@mlrun-db:3306/mlrun
+          - name: MLRUN_HTTPDB__OLD_DSN
+            value: sqlite:////mlrun/db/mlrun.db?check_same_thread=false
+          - name: MLRUN_NUCLIO_MODE
+            value: enabled
+          - name: MLRUN_NUCLIO_DASHBOARD_URL
+            value: http://nuclio-dashboard:8070
+          envFrom:
+          
+          - configMapRef:
+              name: mlrun-common-env
+          - configMapRef:
+              name: mlrun-pipelines-config
+              optional: true
+          - configMapRef:
+              name: mlrun-spark-config
+              optional: true
+          - configMapRef:
+              name: mlrun-override-env
+              optional: true
+          livenessProbe:
+            
+            failureThreshold: 4
+            httpGet:
+              path: /api/healthz
+              port: http
+            initialDelaySeconds: 1000
+            periodSeconds: 15
+            timeoutSeconds: 10
+          readinessProbe:
+            
+            failureThreshold: 4
+            httpGet:
+              path: /api/healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 10
+          resources:
+            {}
+          volumeMounts:
+            - name: storage
+              mountPath: /mlrun/db
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: mlrun-api-pvc
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: mlrun
+                    app.kubernetes.io/instance: release-name
+                    release: release-name
+                    app.kubernetes.io/component: "api"
+                topologyKey: "kubernetes.io/hostname"
